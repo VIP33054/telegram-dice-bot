@@ -7,6 +7,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"os"
 	"strconv"
 	"strings"
 	"telegram-dice-bot/internal/enums"
@@ -38,7 +39,9 @@ func handleGroupCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	case "register":
 		handleRegisterCommand(bot, message)
 	case "sign":
-		handleSignCommand(bot, message)
+		if os.Getenv("SIGN_REWARD_ENABLED") == "true" {
+			handleSignCommand(bot, message)
+		}
 	case "my":
 		handleMyCommand(bot, message)
 	case "myhistory":
@@ -933,13 +936,19 @@ func handleRegisterCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 
 	_, err = chatGroupUserQuery.QueryByTgUserIdAndChatGroupId(db)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
+
+		Balance := 0
+		if os.Getenv("REGISTER_REWARD_ENABLED") == "true" || os.Getenv("REGISTER_REWARD_ENABLED") == "" {
+			Balance = 1000
+		}
+
 		// 没有找到记录 则注册
 		chatGroupUser := &model.ChatGroupUser{
 			TgUserId:    fromUser.ID,
 			ChatGroupId: chatGroup.Id,
 			Username:    fromUser.UserName,
 			IsLeft:      0,
-			Balance:     1000,
+			Balance:     float64(Balance),
 			CreateTime:  time.Now().Format("2006-01-02 15:04:05"),
 		}
 		err := chatGroupUser.Create(db)
@@ -948,7 +957,10 @@ func handleRegisterCommand(bot *tgbotapi.BotAPI, message *tgbotapi.Message) {
 				"err": err,
 			}).Error("创建用户信息异常")
 		} else {
-			msgConfig := tgbotapi.NewMessage(tgChatGroupId, "注册成功！奖励1000积分！")
+			msgConfig := tgbotapi.NewMessage(tgChatGroupId, "注册成功！！")
+			if os.Getenv("REGISTER_REWARD_ENABLED") == "true" || os.Getenv("REGISTER_REWARD_ENABLED") == "" {
+				msgConfig = tgbotapi.NewMessage(tgChatGroupId, "注册成功！奖励1000积分！")
+			}
 			msgConfig.ReplyToMessageID = messageId
 			_, err := sendMessage(bot, &msgConfig)
 			blockedOrKicked(err, tgChatGroupId)
