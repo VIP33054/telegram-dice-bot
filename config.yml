@@ -1,0 +1,37 @@
+# bot基本配置
+bot:
+  # telegram bot token
+  token: "8044675829:AAG70lCtEnMAXIB0HKAgJAt6fWmz6aG2490"
+  # 管理员
+  admins: [7834864392]
+
+# mysql数据库配置
+mysql:
+  host: "turntable.proxy.rlwy.net"
+  port: 33326
+  user: "root"
+  pass: "HumfXtAbEEVLmYhOJAVQWFqjMeeCKPmy"
+  name: "railway"
+  charset: "utf8mb4"
+  max_idle_conns: 10
+  max_open_conns: 100
+  log_level: "error"
+
+# 游戏配置
+game:
+  # 骰子
+  dice:
+    # 游戏开关
+    open: true
+    # 游戏名称
+    name: "猜大小"
+    # 赔率-大
+    odds_big: 1.95
+    # 赔率-小
+    odds_small: 1.95
+    # 赔率-豹子
+    odds_same: 10
+    # 赔率-数字
+    odds_num: 6
+    # 开奖间隔(秒)
+    draw_interval: 120
